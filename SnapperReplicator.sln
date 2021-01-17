@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{82D9AC46-8B24-4B21-91AE-F8E5CE03D5CE}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MechSym.SnapperReplicator", "src\MechSym.SnapperReplicator\MechSym.SnapperReplicator.fsproj", "{86E1A58D-6FFD-4348-8D37-C06C56315290}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "example", "example", "{D3BD49DE-EB2C-4F43-A713-97A95F56DFA8}"
+ProjectSection(SolutionItems) = preProject
+	example\Makefile.example = example\Makefile.example
+	example\run.example.sh = example\run.example.sh
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{E61DB9D0-5E48-4CF2-9EA2-F40B7C475870}"
+ProjectSection(SolutionItems) = preProject
+	LICENSE = LICENSE
+	README.md = README.md
+EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{86E1A58D-6FFD-4348-8D37-C06C56315290} = {82D9AC46-8B24-4B21-91AE-F8E5CE03D5CE}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{86E1A58D-6FFD-4348-8D37-C06C56315290}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86E1A58D-6FFD-4348-8D37-C06C56315290}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86E1A58D-6FFD-4348-8D37-C06C56315290}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86E1A58D-6FFD-4348-8D37-C06C56315290}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

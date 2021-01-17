@@ -1,0 +1,68 @@
+LOCAL_CONFIG = override_me
+
+REMOTE_CONFIG = override_me
+
+LOCAL_WORKDIR = /tmp/snapper-replicator
+
+REMOTE_WORKDIR = /tmp/snapper-replicator
+
+REMOTE_HOST = specify_me
+
+REMOTE_USER = specify_me
+
+REMOTE_KEY = specify_me
+
+MODE = pull
+
+TRANSFER_MODE = rsync
+
+DUMP_MODE = incremental
+
+COMMAND = snapper-replicator -u ${REMOTE_USER} -h ${REMOTE_HOST} -k ${REMOTE_KEY} -rc ${REMOTE_CONFIG} -lc ${LOCAL_CONFIG} -rwd ${REMOTE_WORKDIR} -lwd ${LOCAL_WORKDIR} -m ${MODE}
+
+CREATE_WORKDIRS_OUTPUT = ${LOCAL_WORKDIR}/${LOCAL_CONFIG}/workdirs.done
+
+SNAPPER_CLEANUP_OUTPUT = ${LOCAL_WORKDIR}/${LOCAL_CONFIG}/snapper-cleanup.done
+
+DETERMINE_CHANGES_OUTPUT = ${LOCAL_WORKDIR}/${LOCAL_CONFIG}/pending_changes.json 
+
+DUMP_REMOTE_OUTPUT = ${LOCAL_WORKDIR}/${LOCAL_CONFIG}/dump.done
+
+SYNC_OUTPUT = ${LOCAL_WORKDIR}/${LOCAL_CONFIG}/sync.done
+
+RESTORE_OUTPUT = ${LOCAL_WORKDIR}/${LOCAL_CONFIG}/restore.done
+
+
+.PHONY = justrun fullbackup clean-remote-workdir clean-local-workdir
+
+fullbackup: ${RESTORE_OUTPUT}
+	${COMMAND} clean-remote-workdir
+	${COMMAND} clean-local-workdir
+
+justrun : ${RESTORE_OUTPUT}
+	@echo "Replication is complete"
+
+${RESTORE_OUTPUT} : ${CREATE_WORKDIRS_OUTPUT} ${SYNC_OUTPUT}
+	${COMMAND} restore
+
+${SYNC_OUTPUT}: ${CREATE_WORKDIRS_OUTPUT} ${DUMP_REMOTE_OUTPUT}
+	${COMMAND} synchronize -m ${TRANSFER_MODE}
+
+${DUMP_REMOTE_OUTPUT}: ${CREATE_WORKDIRS_OUTPUT} ${DETERMINE_CHANGES_OUTPUT}
+	${COMMAND} dump -m ${DUMP_MODE}
+	
+${DETERMINE_CHANGES_OUTPUT}: ${CREATE_WORKDIRS_OUTPUT} ${SNAPPER_CLEANUP_OUTPUT}
+	${COMMAND} determine-changes
+	
+${SNAPPER_CLEANUP_OUTPUT}: ${CREATE_WORKDIRS_OUTPUT}
+	${COMMAND} snapper-cleanup-source -alg timeline
+
+${CREATE_WORKDIRS_OUTPUT}:
+	${COMMAND} create-workdirs
+	
+clean-remote-workdir:
+	${COMMAND} clean-remote-workdir
+	
+clean-local-workdir:	
+	${COMMAND} clean-local-workdir	
+	

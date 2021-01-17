@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>MechSym.SnapperReplicator</RootNamespace>
+    <AssemblyName>snapper-replicator</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Thoth.Json.Net" Version="5.0.0" />
+    <PackageReference Include="Fake.Core.Process" Version="5.20.4-alpha.1642" />
+    <PackageReference Include="Fake.IO.FileSystem" Version="5.20.4-alpha.1642" />
+    <PackageReference Include="SSH.NET" Version="2020.0.0" />
+    <PackageReference Include="Argu" Version="6.1.1" />
+    <Compile Include="ControlFlow.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="Executor.fs" />
+    <Compile Include="ShellCommand.fs" />
+    <Compile Include="FileTransfer.fs" />
+    <Compile Include="Snapper.fs" />
+    <Compile Include="Snapper.Serialization.fs" />
+    <Compile Include="SnapperCommand.fs" />
+    <Compile Include="BtrfsCommand.fs" />
+    <Compile Include="ReplicationRequest.fs" />
+    <Compile Include="ReplicationRequest.Serialization.fs" />
+    <Compile Include="ReplicationBatch.fs" />
+    <Compile Include="ReplicationBatch.Serialization.fs" />
+    <Compile Include="RuntimeConfiguration.fs" />
+    <Compile Include="CLI.fs" />
+    <Compile Include="Commands\DetermineChanges.fs" />
+    <Compile Include="Commands\CreateWorkDirs.fs" />
+    <Compile Include="Commands\Dump.fs" />
+    <Compile Include="Commands\Synchronize.fs" />
+    <Compile Include="Commands\Restore.fs" />
+    <Compile Include="Commands\CleanRemoteWorkDir.fs" />
+    <Compile Include="Commands\CleanLocalWorkDir.fs" />
+    <Compile Include="Commands\SnapperCleanSourceSnapshots.fs" />
+    <Compile Include="Main.fs" />
+  </ItemGroup>
+
+</Project>
