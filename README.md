@@ -205,7 +205,7 @@ Thanks to everyone who maintains the following projects:
 - [Thoth.Json](https://www.nuget.org/packages/Thoth.Json.Net/)
 - [Fake.Core.Process](https://www.nuget.org/packages/Fake.Core.Process)
 - [Fake.IO.FileSystem](https://www.nuget.org/packages/Fake.IO.FileSystem)
-- [https://www.nuget.org/packages/SSH.NET/](SSH.NET)
+- [SSH.NET](https://www.nuget.org/packages/SSH.NET/)
 - [Argu](https://www.nuget.org/packages/Argu/)
 - [BTRFS](https://btrfs.wiki.kernel.org/index.php/Main_Page)
 - [Snapper](http://snapper.io/)
