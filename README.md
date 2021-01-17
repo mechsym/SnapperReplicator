@@ -50,6 +50,10 @@ Features:
 
 ### How to get the executable?
 
+From the [releases section](https://github.com/mechsym/SnapperReplicator/releases)
+
+Or build yourself:
+
 Currently, you have to create it yourself, fortunately it is easy:
 1. download .NET 5 SDK
 2. cd into `/src/MechSym.SnapperReplicator`
