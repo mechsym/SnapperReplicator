@@ -197,3 +197,15 @@ Tells whether `snapper-replicator` should always use full snapshots or use incre
 #### Transfer mode
 
 Tells how the data should be transferred over the network. Sftp or Rsync. Sftp is the default, however, Rsync is faster.
+
+## Thanks
+
+Thanks to everyone who maintains the following projects:
+- [.NET Core](https://github.com/dotnet/core)
+- [Thoth.Json](https://www.nuget.org/packages/Thoth.Json.Net/)
+- [Fake.Core.Process](https://www.nuget.org/packages/Fake.Core.Process)
+- [Fake.IO.FileSystem](https://www.nuget.org/packages/Fake.IO.FileSystem)
+- [https://www.nuget.org/packages/SSH.NET/](SSH.NET)
+- [Argu](https://www.nuget.org/packages/Argu/)
+- [BTRFS](https://btrfs.wiki.kernel.org/index.php/Main_Page)
+- [Snapper](http://snapper.io/)
