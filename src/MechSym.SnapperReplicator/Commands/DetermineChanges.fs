@@ -32,7 +32,7 @@ module GetSnapperStateError =
             sprintf "Cannot parse snapper list output: %s" err
         
 
-let private getSnapperState (configName: ConfigName)
+let getSnapperState (configName: ConfigName)
                             (executeSnapper: SnapperCommand -> Result<string, CommandExecutionError>)
                             : Result<SnapperConfigState, GetSnapperStateError> =
 

@@ -28,11 +28,11 @@ module ReplicationBatch =
             match (destination, source) with
             | destinationHead :: destinationTail, sourceHead :: sourceTail ->
                 if destinationHead.Number < sourceHead.Number then
-                    loop source destinationTail None
+                    loop source destinationTail maybeParent
                 else if destinationHead.Number = sourceHead.Number then
                     loop sourceTail destinationTail (Some sourceHead)
                 else
-                    loop sourceTail destination None
+                    loop sourceTail destination maybeParent
 
             | [], sourceHead :: _sourceTail ->
                 let firstRequest =

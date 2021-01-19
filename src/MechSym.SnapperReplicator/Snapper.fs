@@ -1,6 +1,7 @@
 namespace MechSym.SnapperReplicator.Snapper
 
 open System
+open System.Diagnostics
 open System.IO
 
 type SubVolume =
@@ -32,12 +33,16 @@ module ConfigName =
 
 type Config =
     { SubVolume: SubVolume
-      Name: ConfigName }
+      Name: ConfigName } with
+    
+    override this.ToString() = sprintf "%s: %s" this.Name.Value this.SubVolume.Value
 
 type Snapshot =
     { SubVolume: SubVolume
       Number: SnapshotNumber
-      Date: DateTimeOffset option }
+      Date: DateTimeOffset option } with
+    override this.ToString() = sprintf "[%i]" this.Number.Value    
+    
 
 module Snapshot =
     let absoluteParentPath (this: Snapshot): string =

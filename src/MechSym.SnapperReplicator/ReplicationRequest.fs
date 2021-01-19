@@ -17,6 +17,11 @@ type IncrementalReplicationRequest =
 type ReplicationRequest =
   | Full of FullReplicationRequest
   | Incremental of IncrementalReplicationRequest
+  override this.ToString() =
+      match this with
+      | Full full -> sprintf "Full: %s" (full.Subject.ToString())
+      | Incremental incremental -> sprintf "Incremental: %s -> %s" (incremental.Parent.ToString()) (incremental.Subject.ToString()) 
+  
 
 module ReplicationRequest =
     let sendSnapshot (targetPathBase : string) (this: ReplicationRequest): BtrfsCommand =
