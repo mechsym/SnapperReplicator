@@ -27,6 +27,8 @@ let DefaultDumpMode = DumpType.Incremental
 let DefaultTransferMode = TransferMode.Sftp
 
 let createRuntimeConfiguration (parseResult: ParseResults<CLI>): RuntimeConfiguration =
+    let operationMode = parseResult.GetResult Mode
+
     let localConfig =
         parseResult.TryGetResult Local_Config
         |> Option.defaultValue DefaultConfig
@@ -36,6 +38,13 @@ let createRuntimeConfiguration (parseResult: ParseResults<CLI>): RuntimeConfigur
         parseResult.TryGetResult Remote_Config
         |> Option.defaultValue DefaultConfig
         |> ConfigName
+        
+    let sourceConfig, destinationConfig =
+        match operationMode with
+        | Pull ->
+            remoteConfig, localConfig
+        | Push ->
+            localConfig, remoteConfig
 
     let localWorkDir =
         parseResult.TryGetResult Local_Working_Directory
@@ -45,17 +54,22 @@ let createRuntimeConfiguration (parseResult: ParseResults<CLI>): RuntimeConfigur
         parseResult.TryGetResult Remote_Working_Directory
         |> Option.defaultValue DefaultWorkDir
 
+    let sourceWorkDir, destinationWorkDir =
+        match operationMode with
+        | Pull ->
+            remoteWorkDir, localWorkDir
+        | Push ->
+            localWorkDir, remoteWorkDir
+    
     let batchSize =
         parseResult.TryGetResult Batch_Size
         |> Option.defaultValue DefaultBatchSize
 
-    let operationMode = parseResult.GetResult Mode
-
-    { RuntimeConfiguration.SourceConfig = remoteConfig
-      DestinationConfig = localConfig
-      DestinationWorkingDir = localWorkDir
+    { RuntimeConfiguration.SourceConfig = sourceConfig
+      DestinationConfig = destinationConfig
+      DestinationWorkDir = destinationWorkDir
       OperationMode = operationMode
-      SourceWorkingDir = remoteWorkDir
+      SourceWorkDir = sourceWorkDir
       MaximumBatchSize = batchSize }
 
 type ApplicationError =
@@ -116,7 +130,7 @@ let main argv =
 
         let runtimeConfig =
             parseResult |> createRuntimeConfiguration
-
+        
         let verbose =
             parseResult.TryGetResult Verbose |> Option.isSome
 

@@ -20,31 +20,31 @@ module FileTransferError =
 
 type IFileTransferService =
     inherit System.IDisposable
-    abstract download: sourceFiles:string list -> targetDir:string -> Result<unit, FileTransferError>
+    abstract download: sourceDir: string -> sourceFiles:string list -> targetDir:string -> Result<unit, FileTransferError>
 
-    abstract upload: sourceFiles:string list -> targetDir:string -> Result<unit, FileTransferError>
+    abstract upload: sourceDir: string -> sourceFiles:string list -> targetDir:string -> Result<unit, FileTransferError>
 
 module FileTransferService =
 
     module private SftpService =
-        let download (client: SftpClient) (sourceFiles: string list) (targetDir: string): Result<unit, FileTransferError> =
+        let download (client: SftpClient) (sourceDir: string) (sourceFileNames: string list) (targetDir: string): Result<unit, FileTransferError> =
             try
-                for sourceFile in sourceFiles do
-                    let fileName = FileInfo(sourceFile).Name
-                    printfn "Downloading: %s" fileName
-                    let targetPath = Path.Join(targetDir, fileName)
+                for sourceFileName in sourceFileNames do
+                    printfn "Downloading: %s" sourceFileName
+                    let sourceFilePath = Path.Join(sourceDir, sourceFileName)
+                    let targetPath = Path.Join(targetDir, sourceFileName)
                     use output = File.OpenWrite(targetPath)
-                    client.DownloadFile(sourceFile, output)
+                    client.DownloadFile(sourceFilePath, output)
 
                 Ok()
             with e -> Error(DownloadException e)
 
-        let upload (client: SftpClient) (sourceFiles: string list) (targetDir: string): Result<unit, FileTransferError> =
+        let upload (client: SftpClient) (sourceDir: string) (sourceFileNames: string list) (targetDir: string): Result<unit, FileTransferError> =
             try
-                for sourceFile in sourceFiles do
-                    use input = File.OpenRead(sourceFile)
-                    let sourceFileName = FileInfo(sourceFile).Name
+                for sourceFileName in sourceFileNames do
                     printfn "Uploading: %s" sourceFileName
+                    let sourceFilePath = Path.Join(sourceDir, sourceFileName)
+                    use input = File.OpenRead(sourceFilePath)
                     let targetPath = Path.Join(targetDir, sourceFileName)
                     client.UploadFile(input, targetPath)
 
@@ -53,11 +53,11 @@ module FileTransferService =
 
     let sftpService (client: SftpClient) =
         { new IFileTransferService with
-            member __.download (sourceFiles: string list) (targetDir: string): Result<unit, FileTransferError> =
-                SftpService.download client sourceFiles targetDir
+            member __.download (sourceDir: string) (sourceFiles: string list) (targetDir: string): Result<unit, FileTransferError> =
+                SftpService.download client sourceDir sourceFiles targetDir
 
-            member __.upload (sourceFiles: string list) (targetDir: string): Result<unit, FileTransferError> =
-                SftpService.upload client sourceFiles targetDir
+            member __.upload (sourceDir: string) (sourceFiles: string list) (targetDir: string): Result<unit, FileTransferError> =
+                SftpService.upload client sourceDir sourceFiles targetDir
 
             member __.Dispose() = client.Dispose() }
 
@@ -67,26 +67,26 @@ module FileTransferService =
                      (user: string)
                      (keyFile: string)
                      (localExecutor: IExecutor)
+                     (sourceDir: string)
                      (sourceFiles: string list)
                      (targetDir: string)
                      : Result<unit, FileTransferError> =
             let executeShell =
                 localExecutor.GetExecutor ShellCommand.command
 
-            ShellCommand.Rsync(mode, sourceFiles, targetDir, host, user, keyFile)
+            ShellCommand.Rsync(mode, sourceDir, sourceFiles, targetDir, host, user, keyFile)
             |> executeShell
             |> Result.mapError RsyncError
             |> Result.ignore
-
 
         let upload = download
 
     let rsyncService (mode: OperationMode) (host: string) (user: string) (keyFile: string) (localExecutor: IExecutor) =
         { new IFileTransferService with
-            member __.download (sourceFiles: string list) (targetDir: string): Result<unit, FileTransferError> =
-                RsyncFileTransferService.download mode host user keyFile localExecutor sourceFiles targetDir
+            member __.download (sourceDir: string) (sourceFiles: string list) (targetDir: string): Result<unit, FileTransferError> =
+                RsyncFileTransferService.download mode host user keyFile localExecutor sourceDir sourceFiles targetDir
 
-            member __.upload (sourceFiles: string list) (targetDir: string): Result<unit, FileTransferError> =
-                RsyncFileTransferService.upload mode host user keyFile localExecutor sourceFiles targetDir
+            member __.upload (sourceDir: string) (sourceFiles: string list) (targetDir: string): Result<unit, FileTransferError> =
+                RsyncFileTransferService.upload mode host user keyFile localExecutor sourceDir sourceFiles targetDir
 
             member __.Dispose() = () }

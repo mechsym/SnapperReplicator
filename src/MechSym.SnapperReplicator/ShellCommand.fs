@@ -1,13 +1,13 @@
 namespace MechSym.SnapperReplicator.ShellCommand
 
-open System.IO
+open System
 open System.Text
 open MechSym.SnapperReplicator.Types
 
 [<RequireQualifiedAccess>]
 type ShellCommand =
     | CreateDir of path: string
-    | Rsync of mode: OperationMode * srcs: string list * dest: string * host: string * user: string * keyFile: string
+    | Rsync of mode: OperationMode * srcDir: string * srcFiles: string list * dest: string * host: string * user: string * keyFile: string
     | Touch of path: string
     | Remove of path: string
     | Tee of content: string * file: string
@@ -29,33 +29,23 @@ module ShellCommand =
     let private getParameters: ShellCommand -> string list =
         function
         | ShellCommand.CreateDir path -> [ "-p"; path ]
-        | ShellCommand.Rsync (mode, sources, dest, host, user, keyFile) ->
-            let sourceFileGroups =
-                sources
-                |> List.groupBy (fun file -> FileInfo(file).DirectoryName)
-                |> List.map (fun (dirName, files) ->
-                    dirName,
-                    files
-                    |> List.map (fun file -> FileInfo(file).Name))
-                |> List.map (fun (dirName, fileNames) -> sprintf "%s/{%s}" dirName (fileNames |> String.concat ","))
-
-            [ "-a" // archive
-              "-P" // progress
-              "-v" // verbose
-              "-e" // custom shell
+        | ShellCommand.Rsync (mode, sourceDir, _sourceFileNames, destinationDir, host, user, keyFile) ->
+            [ "-e" // custom shell
               sprintf "\"ssh -i %s\"" keyFile
+
+              "--files-from=-" //list of src files should be read from stdin
+              
+              match mode with
+              | OperationMode.Pull ->
+                  sprintf "%s@%s:%s" user host sourceDir
+              | OperationMode.Push ->
+                  sprintf "%s" sourceDir
 
               match mode with
               | OperationMode.Pull ->
-                  for sourceFileGroup in sourceFileGroups do
-                      sprintf "%s@%s:%s" user host sourceFileGroup
+                  destinationDir
               | OperationMode.Push ->
-                  for sourceFileGroup in sourceFileGroups do
-                      sprintf "%s" sourceFileGroup
-
-              match mode with
-              | OperationMode.Pull -> dest
-              | OperationMode.Push -> sprintf "%s@%s:%s" user host dest ]
+                  sprintf "%s@%s:%s" user host destinationDir ]
 
         | ShellCommand.Touch path
         | ShellCommand.Cat path -> [ path ]
@@ -66,6 +56,11 @@ module ShellCommand =
     let private getStdin: ShellCommand -> byte [] option = function
         | ShellCommand.Tee (content, _file) ->
             content |> Encoding.UTF8.GetBytes |> Some
+        | ShellCommand.Rsync(_mode, _sourceDir, sourceFileNames, _destinationDir, _host, _user, _keyFile) ->
+            sourceFileNames
+            |> String.concat Environment.NewLine
+            |> Encoding.UTF8.GetBytes
+            |> Some
         | _ -> None
 
     let command =

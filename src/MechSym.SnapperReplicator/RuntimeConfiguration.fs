@@ -7,27 +7,27 @@ open MechSym.SnapperReplicator.Snapper
 type RuntimeConfiguration =
     { SourceConfig: ConfigName
       DestinationConfig: ConfigName
-      DestinationWorkingDir: string
-      SourceWorkingDir: string
+      DestinationWorkDir: string
+      SourceWorkDir: string
       MaximumBatchSize: int
       OperationMode: OperationMode }
 
 module RuntimeConfiguration =
     let getLocalWorkDir (this: RuntimeConfiguration) =
         match this.OperationMode with
-        | OperationMode.Pull -> this.DestinationWorkingDir
-        | OperationMode.Push -> this.SourceWorkingDir
+        | OperationMode.Pull -> this.DestinationWorkDir
+        | OperationMode.Push -> this.SourceWorkDir
 
     let getRemoteWorkDir (this: RuntimeConfiguration) =
         match this.OperationMode with
-        | OperationMode.Pull -> this.SourceWorkingDir
-        | OperationMode.Push -> this.DestinationWorkingDir
+        | OperationMode.Pull -> this.SourceWorkDir
+        | OperationMode.Push -> this.DestinationWorkDir
         
     let getDestinationConfigWorkDir (this: RuntimeConfiguration) =
-        Path.Join(this.DestinationWorkingDir, this.DestinationConfig.Value)
+        Path.Join(this.DestinationWorkDir, this.DestinationConfig.Value)
         
     let getSourceConfigWorkDir (this: RuntimeConfiguration) =
-        Path.Join(this.SourceWorkingDir, this.SourceConfig.Value)
+        Path.Join(this.SourceWorkDir, this.SourceConfig.Value)
         
     let getLocalConfigWorkDir (this: RuntimeConfiguration) =
         match this.OperationMode with

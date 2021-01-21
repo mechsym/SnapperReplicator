@@ -17,8 +17,7 @@ open MechSym.SnapperReplicator.ReplicationBatch
 
 type CopySnapshotsError =
     | FailedFileTransferError of FileTransferError
-    | SyncDoneFileCreationError of CommandExecutionError
-
+    
 let private copySnapshots (config: RuntimeConfiguration)
                           (batch: ReplicationBatch)
                           (executor: ExecutorService)
@@ -28,62 +27,48 @@ let private copySnapshots (config: RuntimeConfiguration)
         executor
         |> ExecutorService.getLocalExecutorOf ShellCommand.command
 
-    let sourceConfigWorkDir =
-        config
-        |> RuntimeConfiguration.getSourceConfigWorkDir
-
-    let destinationConfigWorkDir =
-        config
-        |> RuntimeConfiguration.getDestinationConfigWorkDir
-
     batch.Requests
-    |> List.map (fun request ->
-        let snapshot =
-            request |> ReplicationRequest.getSnapshot
-
-        let snapshotFileName = snapshot |> Snapshot.dumpSnapshotFileName
-
-        let sourceSnapshotFile =
-            Path.Join(sourceConfigWorkDir, snapshotFileName)
-
-        sourceSnapshotFile)
-
+    |> List.map (ReplicationRequest.getSnapshot >> Snapshot.dumpSnapshotFileName)
     |> List.append
         (batch.Requests
-         |> List.map (fun request ->
-             let snapshot =
-                 request |> ReplicationRequest.getSnapshot
+         |> List.map (ReplicationRequest.getSnapshot >> Snapshot.dumpInfoFileName))
+    |> fun (fileNames: string list) ->
+        let sourceConfigWorkDir =
+            config
+            |> RuntimeConfiguration.getSourceConfigWorkDir
 
-             let infoFileName =
-                 snapshot |> Snapshot.dumpInfoFileName
-
-             let sourceInfoFile =
-                 Path.Join(sourceConfigWorkDir, infoFileName)
-
-             sourceInfoFile))
-    |> fun (transfers: string list) ->
+        let destinationConfigWorkDir =
+            config
+            |> RuntimeConfiguration.getDestinationConfigWorkDir        
+        
         match config.OperationMode with
-        | OperationMode.Pull -> fileTransferService.download transfers destinationConfigWorkDir
-        | OperationMode.Push -> fileTransferService.upload transfers destinationConfigWorkDir
+        | OperationMode.Pull -> fileTransferService.download sourceConfigWorkDir fileNames destinationConfigWorkDir
+        | OperationMode.Push -> fileTransferService.upload sourceConfigWorkDir fileNames destinationConfigWorkDir
     |> Result.mapError FailedFileTransferError
-    >>= (fun _ ->
-        ShellCommand.Touch(config |> RuntimeConfiguration.syncDoneFile)
-        |> executeShellOnLocal
-        |> Result.mapError SyncDoneFileCreationError
-        |> Result.ignore)
 
 type SynchronizationError =
     | CopySnapshotsError of CopySnapshotsError
     | PendingChangesError of DetermineChanges.ParsePendingChangesError
+    | SyncDoneFileCreationError of CommandExecutionError
     
 module SynchronizationError =
     let toMessage: SynchronizationError -> string = function
         | PendingChangesError err -> sprintf "Synchronization failed: %s" (err |> DetermineChanges.ParsePendingChangesError.toMessage)
         | CopySnapshotsError snapshotsError ->
             match snapshotsError with
-            | SyncDoneFileCreationError err -> sprintf "Synchronization failed. Cannot create sync.done file: %s" (err |> CommandExecutionError.toMessage)
             | FailedFileTransferError transferError ->
                 sprintf "Synchronization failed. Cannot transfer files: %s" (transferError |> FileTransferError.toMessage)
+        | SyncDoneFileCreationError err -> sprintf "Synchronization failed. Cannot create sync.done file: %s" (err |> CommandExecutionError.toMessage)
+
+let touchDoneFile (config: RuntimeConfiguration) (executor: ExecutorService) =
+    let executeShellOnLocal =
+        executor
+        |> ExecutorService.getLocalExecutorOf ShellCommand.command    
+    
+    ShellCommand.Touch(config |> RuntimeConfiguration.syncDoneFile)
+    |> executeShellOnLocal
+    |> Result.mapError SyncDoneFileCreationError
+    |> Result.ignore 
 
 let execute (fileTransferService: IFileTransferService)
             (executor: ExecutorService)
@@ -97,7 +82,8 @@ let execute (fileTransferService: IFileTransferService)
     >>= (fun batch ->
         if batch.Requests |> List.isEmpty then
             printfn "There is nothing to transfer"
-            Ok()
+            Ok ()
         else
             copySnapshots config batch executor fileTransferService
             |> Result.mapError CopySnapshotsError)
+    >>= (fun _ -> touchDoneFile config executor)

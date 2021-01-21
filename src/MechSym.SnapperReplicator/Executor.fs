@@ -13,7 +13,7 @@ module Executor =
                     if output.ExitCode = 0 then
                         Ok output.Result.Output
                     else
-                        Error (LocalExecutionError (command, output.ExitCode, output.Result.Output))
+                        Error (LocalExecutionError (command, output.ExitCode, output.Result.Error))
                 let executable = commandFacade.GetExecutable command
                 let parameters = commandFacade.GetParameters command
                 let maybeStdin = commandFacade.GetStdin command
