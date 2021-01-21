@@ -4,4 +4,8 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 /.idea
-/src/MechSym.SnapperReplicator/publish
+/.ionide
+/**/AssemblyInfo.fs
+/.fake
+/publish
+/snapper-replicator*.zip

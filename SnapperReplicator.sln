@@ -14,6 +14,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{E61D
 ProjectSection(SolutionItems) = preProject
 	LICENSE = LICENSE
 	README.md = README.md
+	build.fsx = build.fsx
+	fake.cmd = fake.cmd
+	fake.sh = fake.sh
+	RELEASE_NOTES.md = RELEASE_NOTES.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6E26BBA9-2F4E-492D-829D-28F2B1610DAC}"
