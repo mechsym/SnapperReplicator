@@ -4,3 +4,6 @@
 
 ## 0.1.3 (Unreleased)
 * new build infrastructure
+
+## 0.1.4 (Released 2021/05/13)
+* upgraded dependencies

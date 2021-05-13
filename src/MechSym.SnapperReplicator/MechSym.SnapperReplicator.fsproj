@@ -10,9 +10,9 @@
 
   <ItemGroup>
     <PackageReference Include="Thoth.Json.Net" Version="5.0.0" />
-    <PackageReference Include="Fake.Core.Process" Version="5.20.4-alpha.1642" />
-    <PackageReference Include="Fake.IO.FileSystem" Version="5.20.4-alpha.1642" />
-    <PackageReference Include="SSH.NET" Version="2020.0.0" />
+    <PackageReference Include="Fake.Core.Process" Version="5.20.4" />
+    <PackageReference Include="Fake.IO.FileSystem" Version="5.20.4" />
+    <PackageReference Include="SSH.NET" Version="2020.0.1" />
     <PackageReference Include="Argu" Version="6.1.1" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ControlFlow.fs" />
