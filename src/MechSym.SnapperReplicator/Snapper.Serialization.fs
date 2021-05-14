@@ -28,7 +28,11 @@ module Config =
 
         let parse (result: Map<string, Config list>) =
             result.["configs"]
-            |> List.find (fun config -> config.Name = configName)
+            |> List.tryFind (fun config -> config.Name = configName)
+            |> Option.defaultWith (fun () ->
+                let availableConfigs = result.["configs"] |> List.map (fun config -> config.Name.Value) |> String.concat ", "
+                let message = $"Cannot find config '{configName.Value}'. Available configs: {availableConfigs}"
+                failwith message)
 
         Decode.fromString configsDecoder snapperListConfigsOutput
         |> Result.map parse
