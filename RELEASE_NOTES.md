@@ -7,3 +7,6 @@
 
 ## 0.1.4 (Released 2021/05/13)
 * upgraded dependencies
+
+## 0.1.5 (Released 2021/05/14)
+* handling missing configuration gracefully
