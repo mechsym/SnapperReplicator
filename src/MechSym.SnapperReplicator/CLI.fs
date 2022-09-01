@@ -40,6 +40,7 @@ type CLI =
     | [<CliPrefix(CliPrefix.None)>] Clean_Remote_WorkDir of ParseResults<EmptyArgs>
     | [<CliPrefix(CliPrefix.None)>] Clean_Local_WorkDir of ParseResults<EmptyArgs>
     | [<CliPrefix(CliPrefix.None)>] Snapper_CleanUp_Source of ParseResults<CleanRemoteSnapshotsArgs>
+    | Version
     | [<AltCommandLine("-h"); Mandatory>] Host of hostname: string
     | [<AltCommandLine("-m"); Mandatory>] Mode of OperationMode
     | [<AltCommandLine("-k"); Mandatory>] Key of path: string
@@ -72,4 +73,5 @@ type CLI =
             | Remote_Working_Directory _ -> "Path to the remote working directory"
             | Batch_Size _ -> "Maximum size of a replication batch"
             | Verbose _ -> "Verbose mode"
+            | Version _ -> "Print version and exit"
             | Mode _ -> "Operation mode: whether to pull or push snapshots"

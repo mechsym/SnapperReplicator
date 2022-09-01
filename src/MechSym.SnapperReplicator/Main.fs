@@ -117,90 +117,95 @@ let main argv =
         let parseResult =
             parser.ParseCommandLine(inputs = argv, raiseOnUsage = true)
 
-        let host = parseResult.GetResult Host
+        match parseResult.Contains Version with
+        | true ->
+            printfn "snapper-replicator:{%s}:{%s}" AssemblyVersionInformation.AssemblyVersion AssemblyVersionInformation.AssemblyInformationalVersion
+            0
+        | false ->
+            let host = parseResult.GetResult Host
 
-        let user =
-            parseResult.TryGetResult User
-            |> Option.defaultValue DefaultUser
+            let user =
+                parseResult.TryGetResult User
+                |> Option.defaultValue DefaultUser
 
-        let key = parseResult.GetResult Key
+            let key = parseResult.GetResult Key
 
-        let remoteConnectionInfo =
-            ConnectionInfo(host, user, new PrivateKeyAuthenticationMethod(user, new PrivateKeyFile(key)))
+            let remoteConnectionInfo =
+                ConnectionInfo(host, user, new PrivateKeyAuthenticationMethod(user, new PrivateKeyFile(key)))
 
-        let runtimeConfig =
-            parseResult |> createRuntimeConfiguration
-        
-        let verbose =
-            parseResult.TryGetResult Verbose |> Option.isSome
+            let runtimeConfig =
+                parseResult |> createRuntimeConfiguration
+            
+            let verbose =
+                parseResult.TryGetResult Verbose |> Option.isSome
 
-        use localExecutor = Executor.local verbose
+            use localExecutor = Executor.local verbose
 
-        use remoteExecutor =
-            Executor.remote remoteConnectionInfo verbose
+            use remoteExecutor =
+                Executor.remote remoteConnectionInfo verbose
 
-        let executorService =
-            { ExecutorService.Local = localExecutor
-              Remote = remoteExecutor
-              Mode = runtimeConfig.OperationMode }
+            let executorService =
+                { ExecutorService.Local = localExecutor
+                  Remote = remoteExecutor
+                  Mode = runtimeConfig.OperationMode }
 
-        match parseResult.GetSubCommand() with
-        | Create_WorkDirs _ ->
-            CreateWorkDirs.execute executorService runtimeConfig
-            |> Result.mapError CreateWorkDirsError
+            match parseResult.GetSubCommand() with
+            | Create_WorkDirs _ ->
+                CreateWorkDirs.execute executorService runtimeConfig
+                |> Result.mapError CreateWorkDirsError
 
-        | Determine_Changes _ ->
-            DetermineChanges.execute executorService runtimeConfig
-            |> Result.mapError DetermineChangesError
+            | Determine_Changes _ ->
+                DetermineChanges.execute executorService runtimeConfig
+                |> Result.mapError DetermineChangesError
 
-        | Dump parameters ->
-            let preferredDumpType =
-                parameters.TryGetResult Preferred_Mode
-                |> Option.defaultValue DefaultDumpMode
+            | Dump parameters ->
+                let preferredDumpType =
+                    parameters.TryGetResult Preferred_Mode
+                    |> Option.defaultValue DefaultDumpMode
 
-            Dump.execute executorService runtimeConfig preferredDumpType
-            |> Result.mapError DumpError
+                Dump.execute executorService runtimeConfig preferredDumpType
+                |> Result.mapError DumpError
 
-        | Synchronize parameters ->
-            let transferMode =
-                parameters.TryGetResult Transfer_Mode
-                |> Option.defaultValue DefaultTransferMode
+            | Synchronize parameters ->
+                let transferMode =
+                    parameters.TryGetResult Transfer_Mode
+                    |> Option.defaultValue DefaultTransferMode
 
-            use transferService =
-                match transferMode with
-                | Sftp ->
-                    let client = new SftpClient(remoteConnectionInfo)
-                    client.Connect()
-                    FileTransferService.sftpService client
-                | Rsync ->
-                    FileTransferService.rsyncService runtimeConfig.OperationMode host user key executorService.Local
+                use transferService =
+                    match transferMode with
+                    | Sftp ->
+                        let client = new SftpClient(remoteConnectionInfo)
+                        client.Connect()
+                        FileTransferService.sftpService client
+                    | Rsync ->
+                        FileTransferService.rsyncService runtimeConfig.OperationMode host user key executorService.Local
 
-            Synchronize.execute transferService executorService runtimeConfig
-            |> Result.mapError SynchronizeError
+                Synchronize.execute transferService executorService runtimeConfig
+                |> Result.mapError SynchronizeError
 
-        | Restore _ ->
-            Restore.execute executorService runtimeConfig
-            |> Result.mapError RestoreError
+            | Restore _ ->
+                Restore.execute executorService runtimeConfig
+                |> Result.mapError RestoreError
 
-        | Clean_Remote_WorkDir _ ->
-            CleanRemoteWorkDir.execute executorService runtimeConfig
-            |> Result.mapError CleanRemoteWorkDirError
+            | Clean_Remote_WorkDir _ ->
+                CleanRemoteWorkDir.execute executorService runtimeConfig
+                |> Result.mapError CleanRemoteWorkDirError
 
-        | Clean_Local_WorkDir _ ->
-            CleanLocalWorkDir.execute executorService runtimeConfig
-            |> Result.mapError CleanLocalWorkDirError
+            | Clean_Local_WorkDir _ ->
+                CleanLocalWorkDir.execute executorService runtimeConfig
+                |> Result.mapError CleanLocalWorkDirError
 
-        | Snapper_CleanUp_Source parameters ->
-            let algorithm = parameters.GetResult Algorithm
+            | Snapper_CleanUp_Source parameters ->
+                let algorithm = parameters.GetResult Algorithm
 
-            SnapperCleanSourceSnapshots.execute algorithm executorService runtimeConfig
-            |> Result.mapError SnapperCleanSourceSnapshotsError
+                SnapperCleanSourceSnapshots.execute algorithm executorService runtimeConfig
+                |> Result.mapError SnapperCleanSourceSnapshotsError
 
-        | x -> failwithf "illegal subcommand: %A" x
+            | x -> failwithf "illegal subcommand: %A" x
 
-        |> Result.raiseOnError (ApplicationError.toMessage verbose)
+            |> Result.raiseOnError (ApplicationError.toMessage verbose)
 
-        0
+            0
     with e ->
         printfn "%s" e.Message
         -1
