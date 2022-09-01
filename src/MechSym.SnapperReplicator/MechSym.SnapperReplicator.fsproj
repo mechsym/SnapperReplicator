@@ -2,17 +2,16 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6</TargetFramework>
     <RootNamespace>MechSym.SnapperReplicator</RootNamespace>
     <AssemblyName>snapper-replicator</AssemblyName>
-    <Version>0.1.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Thoth.Json.Net" Version="5.0.0" />
-    <PackageReference Include="Fake.Core.Process" Version="5.20.4" />
-    <PackageReference Include="Fake.IO.FileSystem" Version="5.20.4" />
-    <PackageReference Include="SSH.NET" Version="2020.0.1" />
+    <PackageReference Include="Thoth.Json.Net" Version="8.0.0" />
+    <PackageReference Include="Fake.Core.Process" Version="5.23.0" />
+    <PackageReference Include="Fake.IO.FileSystem" Version="5.23.0" />
+    <PackageReference Include="SSH.NET" Version="2020.0.2" />
     <PackageReference Include="Argu" Version="6.1.1" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ControlFlow.fs" />
@@ -39,6 +38,7 @@
     <Compile Include="Commands\CleanLocalWorkDir.fs" />
     <Compile Include="Commands\SnapperCleanSourceSnapshots.fs" />
     <Compile Include="Main.fs" />
+    <PackageReference Update="FSharp.Core" Version="6.0.5" />
   </ItemGroup>
 
 </Project>

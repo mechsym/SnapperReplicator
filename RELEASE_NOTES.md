@@ -10,3 +10,8 @@
 
 ## 0.1.5 (Released 2021/05/14)
 * handling missing configuration gracefully
+
+## 0.1.6 (Released 2022/09/01)
+
+* upgraded to .net6, upgraded dependencies
+* fixed recent bug with rsync: https://github.com/WayneD/rsync/issues/360

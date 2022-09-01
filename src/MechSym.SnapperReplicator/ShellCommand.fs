@@ -59,6 +59,8 @@ module ShellCommand =
         | ShellCommand.Rsync(_mode, _sourceDir, sourceFileNames, _destinationDir, _host, _user, _keyFile) ->
             sourceFileNames
             |> String.concat Environment.NewLine
+            // https://github.com/WayneD/rsync/issues/360
+            |> fun result -> $"%s{result}{Environment.NewLine}"
             |> Encoding.UTF8.GetBytes
             |> Some
         | _ -> None
